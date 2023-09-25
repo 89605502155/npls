@@ -3,7 +3,7 @@ from sklearn.base import BaseEstimator
 from sklearn.base import RegressorMixin
 
 class npls(RegressorMixin,BaseEstimator):
-    def  __init__(self, n_components=2,a=3):
+    def  __init__(self, n_components:int=2,a:float=3):
         self.n_components = n_components
         self.a=a
     
@@ -40,7 +40,7 @@ class npls(RegressorMixin,BaseEstimator):
             for h in range(0,x.shape[0]):
                 Tt[h,f]=np.dot(np.dot(w_i.transpose(),x[h,:,:].transpose()),w_k)
             T=np.array(Tt[:,0:f+1]).reshape(x.shape[0],f+1)
-            bf=np.dot((np.dot(np.linalg.inv(np.dot(T,T.transpose())-(((self.a/(f+1)))*np.eye(x.shape[0]))),T)).transpose(),
+            bf=np.dot((np.dot(np.linalg.inv(np.dot(T,T.transpose())-(((self.a))*np.eye(x.shape[0]))),T)).transpose(),
                         y.reshape([x.shape[0],1]))
             bf_array+=[bf]
             WW=np.kron(w_k,w_i).reshape(x.shape[1],x.shape[2])

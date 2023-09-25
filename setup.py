@@ -2,7 +2,7 @@ from io import open
 from setuptools import setup
 
 
-version = '0.0.1'
+version = '0.0.3'
 
 with open('README.md', encoding='utf-8') as f:
     long_description = f.read()
@@ -11,7 +11,7 @@ setup(
     name='npls',
     version=version,
 
-    author='Andrey Ferubko and Ivan Krylov',
+    author=['Andrey Ferubko','Ivan Krylov'],
     author_email='ferubko1999@yandex.ru',
 
     description=(
@@ -41,6 +41,7 @@ setup(
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: Implementation :: PyPy',
         'Programming Language :: Python :: Implementation :: CPython',
