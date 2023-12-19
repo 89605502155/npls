@@ -2,7 +2,7 @@ from io import open
 from setuptools import setup
 
 
-version = '0.0.3'
+version = '0.0.4'
 
 with open('README.md', encoding='utf-8') as f:
     long_description = f.read()
@@ -29,7 +29,7 @@ setup(
     license='GNU General Public License v3.0',
 
     packages=['npls'],
-    install_requires=['numpy', 'scikit-learn'],
+    install_requires=['numpy', 'scikit-learn','signal_noise'],
 
     classifiers=[
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',

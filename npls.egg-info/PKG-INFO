@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: npls
-Version: 0.0.3
+Version: 0.0.4
 Summary: It is a Python library for the N-PLS1 regression with L2-regularization.
 Home-page: https://github.com/89605502155/N-PLS
 Author: ['Andrey Ferubko', 'Ivan Krylov']
