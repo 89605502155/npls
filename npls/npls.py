@@ -5,11 +5,12 @@ from signal_noise import signal_noise
 
 class npls(RegressorMixin,BaseEstimator):
     def  __init__(self, excitation_wavelenth:np.ndarray,
-                  emission_wavelenth:np.ndarray, n_components:int=2,a:float=3,
+                  emission_wavelenth:np.ndarray,l1:float=None, n_components:int=2,l2:float=3,
                   derivative_rang:list=[],norm_func:list=[],
                   crash_norm_name:str=None,crash_norm_value:float=None):
         self.n_components = n_components
-        self.a=a
+        self.l2=l2
+        self.l1=l1
         self.derivative_rang=derivative_rang
         self.norm_func=norm_func
         self.crash_norm_name=crash_norm_name
@@ -49,6 +50,12 @@ class npls(RegressorMixin,BaseEstimator):
         response=model.main(signal=signal,x=x)
         return response
 
+    def l1_regularization(self,vector:np.ndarray)->np.ndarray:
+      for i in range(vector.shape[0]):
+        if abs(vector[i])<=self.l1:
+          vector[i]=0
+      return vector
+    
     def fit(self, xtrain, ytrain):
         """Fits the model to the data (X, y)
         Parameters
@@ -84,7 +91,10 @@ class npls(RegressorMixin,BaseEstimator):
             Wk, S, WI = np.linalg.svd(z)
             w_k=np.array(Wk[:,0]).reshape(x.shape[1],1)
             w_i=np.array(WI[0,:]).reshape(x.shape[2],1)
-
+            if self.l1 is not None:
+              w_k=self.l1_regularization(w_k)
+              w_i=self.l1_regularization(w_i)
+              
             if len(self.derivative_rang)>0:
                 response=self.check_smooth_loadings(w_i=w_i[:,0],excitation_wavelenth=self.excitation_wavelenth,
                                            w_k=w_k[:,0],emission_wavelenth=self.emission_wavelenth,
@@ -97,7 +107,7 @@ class npls(RegressorMixin,BaseEstimator):
             for h in range(0,x.shape[0]):
                 Tt[h,f]=np.dot(np.dot(w_i.transpose(),x[h,:,:].transpose()),w_k)
             T=np.array(Tt[:,0:f+1]).reshape(x.shape[0],f+1)
-            bf=np.dot((np.dot(np.linalg.inv(np.dot(T,T.transpose())-(((self.a))*np.eye(x.shape[0]))),T)).transpose(),
+            bf=np.dot((np.dot(np.linalg.inv(np.dot(T,T.transpose())-(((self.l2))*np.eye(x.shape[0]))),T)).transpose(),
                         y.reshape([x.shape[0],1]))
             bf_array+=[bf]
             WW=np.kron(w_k,w_i).reshape(x.shape[1],x.shape[2])

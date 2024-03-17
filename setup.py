@@ -2,7 +2,7 @@ from io import open
 from setuptools import setup
 
 
-version = '0.0.4'
+version = '0.0.5'
 
 with open('README.md', encoding='utf-8') as f:
     long_description = f.read()
@@ -15,16 +15,16 @@ setup(
     author_email='ferubko1999@yandex.ru',
 
     description=(
-        'It is a Python library for the N-PLS1 regression with L2-regularization.'
+        'It is a Python library for the N-PLS1 regression with L1 and L2-regularization.'
     ),
     long_description=long_description,
     long_description_content_type='text/markdown',
 
-    url='https://github.com/89605502155/N-PLS',
+    url='https://github.com/89605502155/npls',
     # download_url='https://github.com/89605502155/N-PLS/archive/v{}.zip'.format(
     #     version
     # ),
-    download_url='https://github.com/89605502155/N-PLS/archive/main.zip',
+    download_url='https://github.com/89605502155/npls/archive/main.zip',
 
     license='GNU General Public License v3.0',
 

@@ -1,8 +1,8 @@
 # npls
 
-![PyPI](https://img.shields.io/pypi/v/npls?color=orange) ![Python 3.8, 3.9, 3.10, 3.11](https://img.shields.io/pypi/pyversions/npls?color=blueviolet) ![GitHub Pull Requests](https://img.shields.io/github/issues-pr/89605502155/N-PLS?color=blueviolet) ![License](https://img.shields.io/pypi/l/npls?color=blueviolet) ![Forks](https://img.shields.io/github/forks/89605502155/N-PLS?style=social)
+![PyPI](https://img.shields.io/pypi/v/npls?color=orange) ![Python 3.8, 3.9, 3.10, 3.11,3.12](https://img.shields.io/pypi/pyversions/npls?color=blueviolet) ![GitHub Pull Requests](https://img.shields.io/github/issues-pr/89605502155/npls?color=blueviolet) ![License](https://img.shields.io/pypi/l/npls?color=blueviolet) ![Forks](https://img.shields.io/github/forks/89605502155/npls?style=social)
 
-**npls** - this module is a Python library for the N-PLS1 regression with L2-regularization.
+**npls** - this module is a Python library for the N-PLS1 regression with L1 and L2-regularization.
 
 
 ## Installation
@@ -15,17 +15,18 @@ pip install npls
 
 Or from Github:
 ```bash
-pip install https://github.com/89605502155/N-PLS/main.zip
+pip install https://github.com/89605502155/npls/main.zip
 ```
 
 ## Usage
 
-You can fit your own regression model. n_components - is a number of components of SVD decomposition and a is a parameter of L2-regularization. X_train - is a 3d-array. y_train -is a vector.
+You can fit your own regression model. n_components - is a number of components of SVD decomposition and l2 is a parameter of L2-regularization (Ridge) and l1 is a parameter of L1-regularization (LASSO), excitation_wavelenth - is an 
+excitation wavelenth of fluor. (if you have not excitation wavelenth you can write list with len equal first shape of X_train),emission_wavelenth is an emission wavelenth. X_train - is a 3d-array. y_train -is a vector.
 
 ```python
 from npls import npls 
 
-model=npls(n_components=4, a=0.09)
+model=npls(n_components=4, l2=0.09,excitation_wavelenth=[501,552],emission_wavelenth=[553,604])
 model.fit(X_train,y_train)
 #components of svd-decomposition
 w_i=model.w_i
@@ -49,11 +50,13 @@ from sklearn.metrics import r2_score, make_scorer
 import sklearn
 from sklearn.model_selection import GridSearchCV
 
-npls1=npls()
+npls1=npls(excitation_wavelenth=[501,552],emission_wavelenth=[553,604])
 #you can use many error metrics
 scoring={'mse': make_scorer(mean_squared_error),'r2':'r2'}
 parametrsNames={'n_components': [4],
-                'a': np.logspace(-25, 25,num = 51)}
+                'l2': np.logspace(-25, 25,num = 51),
+                'l1': np.logspace(-25, 25,num = 51)
+                }
 
 gridCought=GridSearchCV(npls1, parametrsNames, cv=5, 
     scoring=scoring,refit='r2',return_train_score=True)
