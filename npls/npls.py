@@ -4,13 +4,22 @@ from sklearn.base import RegressorMixin
 from signal_noise import signal_noise
 
 class npls(RegressorMixin,BaseEstimator):
-    def  __init__(self, excitation_wavelenth:np.ndarray,
-                  emission_wavelenth:np.ndarray,l1:float=None, n_components:int=2,l2:float=3,
+    def  __init__(self, excitation_wavelenth:np.ndarray=np.array([0]),
+                  emission_wavelenth:np.ndarray=np.array([0]), n_components:int=2,a:float=3,
                   derivative_rang:list=[],norm_func:list=[],
                   crash_norm_name:str=None,crash_norm_value:float=None):
+        """
+        If you want to use snr, you need input excitation_wavelenth and emission_wavelenth,
+        crash_norm_name and crash_norm_value and norm_func and derivative_rang.
+        Example:
+
+        m=npls(crash_norm_name='evklid',derivative_rang=[1],
+         emission_wavelenth=np.array([1,2,3]),
+         excitation_wavelenth=np.array([1,2,3]),
+         crash_norm_value=9)
+        """
         self.n_components = n_components
-        self.l2=l2
-        self.l1=l1
+        self.a=a
         self.derivative_rang=derivative_rang
         self.norm_func=norm_func
         self.crash_norm_name=crash_norm_name
@@ -18,14 +27,16 @@ class npls(RegressorMixin,BaseEstimator):
         self.excitation_wavelenth=excitation_wavelenth
         self.emission_wavelenth=emission_wavelenth
 
-    def check_smooth_loadings(self,w_i,excitation_wavelenth,
+    def __check_smooth_loadings(self,w_i,excitation_wavelenth,
                               w_k,emission_wavelenth, n_component:int) -> dict[str,dict]:
         # print(w_i.shape,excitation_wavelenth.shape,
         #                       w_k.shape,emission_wavelenth.shape, n_component)
-        resp_emission=self.chek_smooth_one_model(w_k,emission_wavelenth)
-        resp_excitation=self.chek_smooth_one_model(w_i,excitation_wavelenth)
+        resp_emission=self.__chek_smooth_one_model(w_k,emission_wavelenth)
+        resp_excitation=self.__chek_smooth_one_model(w_i,excitation_wavelenth)
         if self.crash_norm_name is not None:
+            #print(resp_emission,self.crash_norm_name,resp_emission[self.crash_norm_name],resp_excitation[self.crash_norm_name])
             for j in range(len(resp_emission[self.crash_norm_name])):
+                #print(resp_emission[self.crash_norm_name][j])
                 if resp_emission[self.crash_norm_name][j]<=self.crash_norm_value:
                     error_message_1=f'Emission {n_component} component is a very noisy.'
                     error_message_2=' May be you can choose another norm.'
@@ -44,18 +55,12 @@ class npls(RegressorMixin,BaseEstimator):
             }
 
 
-    def chek_smooth_one_model(self,signal,x) -> dict[str, list]:
-        model=signal_noise(derivative_rang=self.derivative_rang,
-                                    norm_func=self.norm_func)
+    def __chek_smooth_one_model(self,signal,x) -> dict[str, list]:
+        model=signal_noise()
         response=model.main(signal=signal,x=x)
+        #print(response,signal,x)
         return response
 
-    def l1_regularization(self,vector:np.ndarray)->np.ndarray:
-      for i in range(vector.shape[0]):
-        if abs(vector[i])<=self.l1:
-          vector[i]=0
-      return vector
-    
     def fit(self, xtrain, ytrain):
         """Fits the model to the data (X, y)
         Parameters
@@ -91,12 +96,9 @@ class npls(RegressorMixin,BaseEstimator):
             Wk, S, WI = np.linalg.svd(z)
             w_k=np.array(Wk[:,0]).reshape(x.shape[1],1)
             w_i=np.array(WI[0,:]).reshape(x.shape[2],1)
-            if self.l1 is not None:
-              w_k=self.l1_regularization(w_k)
-              w_i=self.l1_regularization(w_i)
-              
+
             if len(self.derivative_rang)>0:
-                response=self.check_smooth_loadings(w_i=w_i[:,0],excitation_wavelenth=self.excitation_wavelenth,
+                response=self.__check_smooth_loadings(w_i=w_i[:,0],excitation_wavelenth=self.excitation_wavelenth,
                                            w_k=w_k[:,0],emission_wavelenth=self.emission_wavelenth,
                                            n_component=f)
                 self.snr_emission.append(response['Emission'])
@@ -107,7 +109,7 @@ class npls(RegressorMixin,BaseEstimator):
             for h in range(0,x.shape[0]):
                 Tt[h,f]=np.dot(np.dot(w_i.transpose(),x[h,:,:].transpose()),w_k)
             T=np.array(Tt[:,0:f+1]).reshape(x.shape[0],f+1)
-            bf=np.dot((np.dot(np.linalg.inv(np.dot(T,T.transpose())-(((self.l2))*np.eye(x.shape[0]))),T)).transpose(),
+            bf=np.dot((np.dot(np.linalg.inv(np.dot(T,T.transpose())-(((self.a))*np.eye(x.shape[0]))),T)).transpose(),
                         y.reshape([x.shape[0],1]))
             bf_array+=[bf]
             WW=np.kron(w_k,w_i).reshape(x.shape[1],x.shape[2])
@@ -141,4 +143,5 @@ class npls(RegressorMixin,BaseEstimator):
             x=np.array(x-(mmas))
             y=(y+(np.dot(T,self.bf_array[f])).reshape(x.shape[0]))
         return y
+
 

@@ -26,7 +26,7 @@ excitation wavelenth of fluor. (if you have not excitation wavelenth you can wri
 ```python
 from npls import npls 
 
-model=npls(n_components=4, l2=0.09,excitation_wavelenth=[501,552],emission_wavelenth=[553,604])
+model=npls(n_components=4, l2=0.09)
 model.fit(X_train,y_train)
 #components of svd-decomposition
 w_i=model.w_i
@@ -35,6 +35,24 @@ w_k=model.w_k
 y_predicted=model.predict(X_test)
 ```
 
+If you want to use snr, you need input excitation_wavelenth and emission_wavelenth,
+        crash_norm_name and crash_norm_value and norm_func and derivative_rang.
+        Example:
+```python
+from npls import npls 
+model=npls(crash_norm_name='evklid',derivative_rang=[1],
+    emission_wavelenth=np.array([1,2,3]),
+    excitation_wavelenth=np.array([1,2,3]),
+    crash_norm_value=9)
+```
+and with use L2 and N components:
+```python
+from npls import npls 
+model=npls(crash_norm_name='evklid',derivative_rang=[1],
+    emission_wavelenth=np.array([1,2,3]),
+    excitation_wavelenth=np.array([1,2,3]),
+    crash_norm_value=9,n_components=4, l2=0.09)
+```
 ## Example
 
 You can use this library with Scikit-learn library. For example, we can use GridSearchCV.
